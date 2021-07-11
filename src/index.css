@@ -1,0 +1,31 @@
+@font-face {
+  font-family: "AtlasGrotesk-Regular";
+  src: url("./font/AtlasGrotesk-Regular-Web.woff");
+}
+
+@font-face {
+  font-family: "AtlasGrotesk-Light-Web";
+  src: url("./font/AtlasGrotesk-Light-Web.woff");
+}
+
+@font-face {
+  font-family: "AtlasGrotesk-Medium-Web";
+  src: url("./font/AtlasGrotesk-Medium-Web.woff");
+}
+
+@font-face {
+  font-family: "AtlasGrotesk-Thin-Web";
+  src: url("./font/AtlasGrotesk-Thin-Web.woff");
+}
+
+html,
+body,
+#root {
+  height: 100%;
+  padding: 0;
+  margin: 0;
+}
+
+* {
+  box-sizing: border-box;
+}
