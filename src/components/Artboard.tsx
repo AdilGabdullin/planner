@@ -1,69 +1,55 @@
 import { Image as KonvaImage } from "konva/lib/shapes/Image";
-import { DragEventHandler, useRef } from "react";
-import { Stage, Layer, Image } from "react-konva";
-import styled from "styled-components";
-import { artboard, entities } from "../slices/config";
-import { selectDrop } from "../slices/drop";
-import { place, selectPlacement } from "../slices/placement";
 import { useAppDispatch, useAppSelector } from "../store";
-import { Grid } from "./Grid";
+import { place, setDrop, selectArtboard, selectFurniture, selectDrop, setStageRect } from "../slices/artboard";
+import { DragEventHandler, useEffect, useRef } from "react";
+import styled from "styled-components";
+import { AppStage } from "./AppStage";
 
-const { width, height, gridStep, padding } = artboard;
-export function Artboard({ dropShadow }: { dropShadow: HTMLImageElement }) {
-  // state
-  const { id, offset } = useAppSelector(selectDrop);
-  const placement = useAppSelector(selectPlacement);
-  // events
-  const dispatch = useAppDispatch();
-  const shadowRef = useRef<KonvaImage>(null);
-  const stageRef = useRef<HTMLDivElement>(null);
-  const round = (x: number) =>
-    Math.round((x - padding) / gridStep) * gridStep + padding;
-  const handleDragOver: DragEventHandler = (e) => {
-    e.preventDefault();
-    const shadow = shadowRef.current;
-    const stage = stageRef.current;
-    if (shadow === null || stage === null) return;
-    const { x: stageX, y: stageY } = stage.getBoundingClientRect();
-    shadow.setAttrs({
-      x: round(e.clientX - stageX) + offset[0],
-      y: round(e.clientY - stageY) + offset[1],
-      visible: true,
+export function Artboard() {
+    const dispatch = useAppDispatch();
+    const { round } = useAppSelector(selectArtboard);
+    const drop = useAppSelector(selectDrop);
+    const furniture = useAppSelector(selectFurniture);
+    const dropRef = useRef<KonvaImage>(null);
+    const handleDragOver: DragEventHandler = (e) => {
+        e.preventDefault();
+        const dropImage = dropRef.current;
+        const dropzone = e.target;
+        if (dropImage === null || !(dropzone instanceof Element)) return;
+        const boundingRect = dropzone.getBoundingClientRect();
+        const layerX = e.clientX - boundingRect.x;
+        const layerY = e.clientY - boundingRect.y;
+        const { offset } = furniture[drop.id];
+        dropImage.setAttrs({
+            x: round(layerX) + offset[0],
+            y: round(layerY) + offset[1],
+        });
+        if (!drop.visible) dispatch(setDrop({ visible: true }));
+    };
+    const handleDragLeave: DragEventHandler = (e) => {
+        dispatch(setDrop({ visible: false }));
+    };
+    const handleDrop: DragEventHandler = (e) => {
+        e.preventDefault();
+        const dropImage = dropRef.current;
+        if (dropImage === null) return;
+        const { x, y } = dropImage.attrs;
+        dispatch(place({ id: drop.id, x, y }));
+    };
+    const stageRef = useRef<HTMLDivElement>(null);
+    useEffect(() => {
+        if (stageRef.current) {
+            const { x, y, width, height } = stageRef.current.getBoundingClientRect();
+            dispatch(setStageRect({ x, y, width, height }));
+        }
     });
-  };
-  const handleDrop: DragEventHandler = (e) => {
-    e.preventDefault();
-    const shadow = shadowRef.current;
-    if (shadow === null) return;
-    shadow.visible(false);
-    const { x, y } = shadow.attrs;
-    dispatch(place({ x, y, rotation: 0, id }));
-  };
-  const handleDragLeave: DragEventHandler = (e) => {
-    const shadow = shadowRef.current;
-    if (shadow === null) return;
-    shadow.visible(false);
-  };
-  return (
-    <Wrap
-      ref={stageRef}
-      onDragOver={handleDragOver}
-      onDrop={handleDrop}
-      onDragLeave={handleDragLeave}
-    >
-      <Stage width={width + 2 * padding} height={height + 2 * padding}>
-        <Layer>
-          <Grid {...{ width, height, padding, gridStep }} />
-          {placement.map(({ id, x, y, rotation }, key) => (
-            <Image {...{ key, x, y, rotation }} image={entities[id].image} />
-          ))}
-          <Image ref={shadowRef} image={dropShadow} visible={false} />
-        </Layer>
-      </Stage>
-    </Wrap>
-  );
+    return (
+        <Dropzone ref={stageRef} onDragOver={handleDragOver} onDrop={handleDrop} onDragLeave={handleDragLeave}>
+            <AppStage dropRef={dropRef} />
+        </Dropzone>
+    );
 }
 
-const Wrap = styled.div`
-  display: table;
+const Dropzone = styled.div`
+    display: table;
 `;

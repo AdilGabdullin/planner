@@ -1,13 +1,11 @@
 import { TypedUseSelectorHook, useDispatch, useSelector } from "react-redux";
 import { configureStore } from "@reduxjs/toolkit";
-import { placementReducer } from "./slices/placement";
-import { dropReducer } from "./slices/drop";
+import { artboardReducer } from "./slices/artboard";
 
 export const store = configureStore({
-  reducer: {
-    placement: placementReducer,
-    drop: dropReducer,
-  },
+    reducer: {
+        artboard: artboardReducer,
+    },
 });
 
 export type AppDispatch = typeof store.dispatch;
