@@ -104,4 +104,4 @@ export const selectPlacement = (state: RootState) => state.artboard.placement;
 export const selectStageRect = (state: RootState) => state.artboard.stageRect;
 export const selectDrop = (state: RootState) => state.artboard.drop;
 // reducer
-export const artboardReducer = slice.reducer;
+export const artboardReducer = slice.reducer; 
