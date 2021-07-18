@@ -10,5 +10,5 @@ export function DropShadow({ dropRef }: { dropRef: React.RefObject<KonvaImage> }
     if (!visible) return null;
     const image = furniture[id].image;
     const corner = type === FurnitureType.LeftCorner || type === FurnitureType.RightCorner;
-    return <>{!corner && <Image ref={dropRef} image={image} />}</>;
+    return <>{!corner && <Image ref={dropRef} y={-200} image={image} />}</>;
 }

@@ -55,7 +55,7 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
         dispatch(setSelected([]));
         dispatch(setSelected(selected));
     };
-    const handleMouseEnter = (id: number) => (e: KEO) => {
+    const onMouseEnter = (id: number) => (e: KEO) => {
         if (!rectMode) dispatch(setSelected([id]));
     };
     return (
@@ -67,7 +67,7 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
                     <Image
                         {...{ key, x: x + offset[0], y: y + offset[1], rotation }}
                         image={furniture[id].image}
-                        onMouseEnter={handleMouseEnter(key)}
+                        onMouseEnter={onMouseEnter(key)}
                     />
                 );
             })}

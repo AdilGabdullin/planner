@@ -1,9 +1,11 @@
+import { useRef, useState } from "react";
 import { Stage, Layer, Rect } from "react-konva";
 import { Provider, useStore } from "react-redux";
 import { Grid } from "./Grid";
 import { Placement } from "./Placement";
-import { Util } from "konva/lib/Util";
 import { DropShadow } from "./DropShadow";
+import { Border } from "./Border";
+import { Util } from "konva/lib/Util";
 import { Image as KonvaImage } from "konva/lib/shapes/Image";
 import { Rect as KonvaRect } from "konva/lib/shapes/Rect";
 import { Line as KonvaLine } from "konva/lib/shapes/Line";
@@ -11,7 +13,6 @@ import { Stage as KonvaStage } from "konva/lib/Stage";
 import { KonvaEventObject } from "konva/lib/Node";
 import { useAppDispatch, useAppSelector } from "../store";
 import { selectArtboard, selectPlacement, setSelected } from "../slices/artboard";
-import { useRef, useState } from "react";
 
 export function AppStage({ dropRef }: { dropRef: React.RefObject<KonvaImage> }) {
     const dispatch = useAppDispatch();
@@ -48,6 +49,7 @@ export function AppStage({ dropRef }: { dropRef: React.RefObject<KonvaImage> }) 
             <Provider store={useStore()}>
                 <Layer>
                     <Grid />
+                    <Border />
                     <Placement rectMode={rectMode} />
                     <DropShadow dropRef={dropRef} />
                     <Rect {...rect} ref={rectRef} fill="rgba(0,0,255,0.5)" visible={rectMode} />
