@@ -29,10 +29,10 @@ export function Selector() {
     const handleDragStart: DragEventHandler = (e) => {
         const { target } = e;
         if (!(target instanceof Element)) return;
-        const furnitureId = target.getAttribute("data-furniture-id");
-        if (furnitureId === null) return;
+        const id = target.getAttribute("data-furniture-id");
+        if (id === null) return;
         setEmptyDragImage(e);
-        dispatch(setDrop({ id: +furnitureId }));
+        dispatch(setDrop({ id: +id }));
     };
     const handleDragEnd: DragEventHandler = (e) => {
         dispatch(setDrop({ visible: false }));

@@ -24,6 +24,23 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
     const stageRect = useAppSelector(selectStageRect);
     const [start, setStart] = useState({ x: 0, y: 0 });
     const grouped = placement.filter((p) => p.selected);
+    const {
+        groupRect,
+        offset: { ox1, oy1 },
+    } = getGroupRectOffset(grouped, round);
+    const groupWidth = groupRect.width;
+    const groupHeight = groupRect.height;
+    const xRange = [
+        stageRect.x + ox1 + padding - start.x - 1,
+        stageRect.x + stageRect.width + ox1 - groupWidth - padding - start.x - 1,
+    ];
+    const yRange = [oy1 + padding - start.y - 1, stageRect.height + oy1 - groupHeight - padding - start.y - 1];
+    const dragBoundFunc = (pos: Vector2d) => {
+        return {
+            x: toRange(pos.x, xRange),
+            y: toRange(pos.y, yRange),
+        };
+    };
     const onDragStart = (e: KEO) => {
         const { x, y } = e.target.getClientRect();
         setStart({ x, y });
@@ -41,25 +58,6 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
     const handleMouseEnter = (id: number) => (e: KEO) => {
         if (!rectMode) dispatch(setSelected([id]));
     };
-
-    const {
-        groupRect,
-        offset: { ox1, oy1, ox2, oy2 },
-    } = getGroupRectOffset(grouped, round);
-    const groupWidth = groupRect ? groupRect.width : 0;
-    const groupHeight = groupRect ? groupRect.height : 0;
-    const { x, width, height } = stageRect;
-    const xMin = x + ox1 + padding - start.x - 1;
-    const xMax = x + width + ox1 + ox2 - groupWidth - padding - start.x - 1;
-    const yMin = oy1 + padding - start.y - 1;
-    const yMax = height + oy1 + oy2 - groupHeight - padding - start.y - 1;
-    const dragBoundFunc = (pos: Vector2d) => {
-        return {
-            x: Math.min(Math.max(pos.x, xMin), xMax),
-            y: Math.min(Math.max(pos.y, yMin), yMax),
-        };
-    };
-
     return (
         <>
             {placement.map(({ id, x, y, rotation, selected }, key) => {
@@ -91,6 +89,12 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
     );
 }
 
+function toRange(x: number, [min, max]: number[]) {
+    if (x < min) return min;
+    if (x > max) return max;
+    return x;
+}
+
 function getGroupRectOffset(grouped: PlacementType[], round: (x: number) => number) {
     let xMin = Infinity;
     let yMin = Infinity;
@@ -99,20 +103,24 @@ function getGroupRectOffset(grouped: PlacementType[], round: (x: number) => numb
     let res = {
         ox1: 0,
         oy1: 0,
-        ox2: 0,
-        oy2: 0,
     };
     for (const p of grouped) {
         const { x, y, width, height, offset } = p;
-        const [ox1, oy1, ox2, oy2] = offset;
-        if (x < xMin) xMin = x;
-        if (y < yMin) yMin = y;
-        if (x + width > xMax) xMax = x + width;
-        if (y + height > yMax) yMax = y + height;
-        if (x + ox1 < xMin + res.ox1) res.ox1 = ox1;
-        if (y + oy1 < yMin + res.oy1) res.oy1 = oy1;
-        if (x + width + ox2 > xMax + res.ox2) res.ox2 = ox2;
-        if (y + height + oy1 > yMax + res.oy2) res.oy2 = oy2;
+        const [ox1, oy1] = offset;
+        if (x < xMin || x + ox1 < xMin + res.ox1) {
+            xMin = x;
+            res.ox1 = ox1;
+        }
+        if (y < yMin || y + oy1 < yMin + res.oy1) {
+            yMin = y;
+            res.oy1 = oy1;
+        }
+        if (x + width > xMax) {
+            xMax = x + width;
+        }
+        if (y + height > yMax) {
+            yMax = y + height;
+        }
     }
     const x = round(xMin);
     const y = round(yMin);

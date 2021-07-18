@@ -13,6 +13,7 @@ export function Artboard() {
     const dropRef = useRef<KonvaImage>(null);
     const handleDragOver: DragEventHandler = (e) => {
         e.preventDefault();
+        if (!drop.visible) dispatch(setDrop({ visible: true }));
         const dropImage = dropRef.current;
         const dropzone = e.target;
         if (dropImage === null || !(dropzone instanceof Element)) return;
@@ -24,7 +25,6 @@ export function Artboard() {
             x: round(layerX) + offset[0],
             y: round(layerY) + offset[1],
         });
-        if (!drop.visible) dispatch(setDrop({ visible: true }));
     };
     const handleDragLeave: DragEventHandler = (e) => {
         dispatch(setDrop({ visible: false }));

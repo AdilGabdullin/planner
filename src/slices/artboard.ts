@@ -2,6 +2,7 @@ import { config } from "../config";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import { IRect } from "konva/lib/types";
+import { FurnitureType } from "../config";
 
 // config to furniture
 const toPixel = (x: number) => x * config.ppmArtboard;
@@ -50,6 +51,7 @@ const slice = createSlice({
         drop: {
             id: 0,
             visible: false,
+            type: FurnitureType.Seat,
         },
         stageRect: { x: 0, y: 0, width: 0, height: 0 } as IRect,
     },
@@ -89,7 +91,10 @@ const slice = createSlice({
         },
         setDrop: (state, action: PayloadAction<{ id?: number; visible?: boolean }>) => {
             const { id, visible } = action.payload;
-            if (id !== undefined) state.drop.id = id;
+            if (id !== undefined) {
+                state.drop.id = id;
+                state.drop.type = furniture[id].type;
+            }
             if (visible !== undefined) state.drop.visible = visible;
         },
     },
@@ -104,4 +109,4 @@ export const selectPlacement = (state: RootState) => state.artboard.placement;
 export const selectStageRect = (state: RootState) => state.artboard.stageRect;
 export const selectDrop = (state: RootState) => state.artboard.drop;
 // reducer
-export const artboardReducer = slice.reducer; 
+export const artboardReducer = slice.reducer;

@@ -1,22 +1,21 @@
-import { Stage, Layer, Image, Rect } from "react-konva";
+import { Stage, Layer, Rect } from "react-konva";
 import { Provider, useStore } from "react-redux";
 import { Grid } from "./Grid";
 import { Placement } from "./Placement";
 import { Util } from "konva/lib/Util";
+import { DropShadow } from "./DropShadow";
 import { Image as KonvaImage } from "konva/lib/shapes/Image";
 import { Rect as KonvaRect } from "konva/lib/shapes/Rect";
 import { Line as KonvaLine } from "konva/lib/shapes/Line";
 import { Stage as KonvaStage } from "konva/lib/Stage";
 import { KonvaEventObject } from "konva/lib/Node";
 import { useAppDispatch, useAppSelector } from "../store";
-import { selectArtboard, selectFurniture, selectPlacement, selectDrop, setSelected } from "../slices/artboard";
+import { selectArtboard, selectPlacement, setSelected } from "../slices/artboard";
 import { useRef, useState } from "react";
 
 export function AppStage({ dropRef }: { dropRef: React.RefObject<KonvaImage> }) {
     const dispatch = useAppDispatch();
     const rectRef = useRef<KonvaRect>(null);
-    const drop = useAppSelector(selectDrop);
-    const furniture = useAppSelector(selectFurniture);
     const placement = useAppSelector(selectPlacement);
     const initialState = { x1: 0, y1: 0, x2: 0, y2: 0, rectMode: false };
     const [{ x1, y1, x2, y2, rectMode }, setState] = useState(initialState);
@@ -50,7 +49,7 @@ export function AppStage({ dropRef }: { dropRef: React.RefObject<KonvaImage> }) 
                 <Layer>
                     <Grid />
                     <Placement rectMode={rectMode} />
-                    <Image ref={dropRef} image={furniture[drop.id].image} visible={drop.visible} />
+                    <DropShadow dropRef={dropRef} />
                     <Rect {...rect} ref={rectRef} fill="rgba(0,0,255,0.5)" visible={rectMode} />
                 </Layer>
             </Provider>

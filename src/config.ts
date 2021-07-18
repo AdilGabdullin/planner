@@ -1,4 +1,4 @@
-enum FurnitureType {
+export enum FurnitureType {
     Seat,
     LeftCorner,
     RightCorner,
