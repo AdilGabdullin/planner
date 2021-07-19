@@ -1,7 +1,7 @@
 import { useState, useRef, DragEventHandler, DragEvent } from "react";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../store";
-import { selectFurniture, setDrop } from "../slices/artboard";
+import { selectFurniture, setDrop, addMagnets, removeMagnets } from "../slices/artboard";
 
 export function Selector() {
     // state
@@ -33,9 +33,11 @@ export function Selector() {
         if (id === null) return;
         setEmptyDragImage(e);
         dispatch(setDrop({ id: +id }));
+        dispatch(addMagnets());
     };
     const handleDragEnd: DragEventHandler = (e) => {
         dispatch(setDrop({ visible: false }));
+        dispatch(removeMagnets());
     };
     return (
         <Carousel>

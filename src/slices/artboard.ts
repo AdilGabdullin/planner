@@ -40,9 +40,15 @@ export interface Placement {
     y: number;
     width: number;
     height: number;
-    rotation: 0 | 90 | 180 | 270;
+    rotation: number;
     selected: boolean;
     offset: number[];
+    type: FurnitureType;
+}
+export interface Magnet {
+    x: number;
+    y: number;
+    rotation: number;
 }
 const slice = createSlice({
     name: "artboard",
@@ -54,10 +60,11 @@ const slice = createSlice({
             type: FurnitureType.Seat,
         },
         stageRect: { x: 0, y: 0, width: 0, height: 0 } as IRect,
+        magnets: [] as Magnet[],
     },
     reducers: {
-        place: (state, action: PayloadAction<{ id: number; x: number; y: number }>) => {
-            const { id, x, y } = action.payload;
+        place: (state, action: PayloadAction<{ id: number; x: number; y: number; rotation?: number }>) => {
+            const { id, x, y, rotation } = action.payload;
             const furn = furniture[id];
             const { offset } = furn;
             const [ox1, oy1, ox2, oy2] = offset;
@@ -67,17 +74,22 @@ const slice = createSlice({
                 y: y - oy1,
                 width: furn.width + ox1 + ox2,
                 height: furn.height + oy1 + oy2,
-                rotation: 0,
+                rotation: rotation ?? 0,
                 selected: false,
                 offset,
+                type: furn.type,
             });
         },
         move: (state, action: PayloadAction<{ selected: number[]; movementX: number; movementY: number }>) => {
             const { selected, movementX, movementY } = action.payload;
+            const notCornerId = selected.find((id) => furniture[id].type === FurnitureType.Seat) as number; // selection always contain no corner
+            const { x, y } = state.placement[notCornerId];
+            const dx = round(x + movementX) - x;
+            const dy = round(y + movementY) - y;
             selected.forEach((id) => {
-                const placed = state.placement[id];
-                placed.x = round(placed.x + movementX);
-                placed.y = round(placed.y + movementY);
+                const p = state.placement[id];
+                p.x += dx;
+                p.y += dy;
             });
         },
         setSelected: (state, action: PayloadAction<number[]>) => {
@@ -97,16 +109,32 @@ const slice = createSlice({
             }
             if (visible !== undefined) state.drop.visible = visible;
         },
+        addMagnets: (state) => {
+            const seats = state.placement.filter((p) => p.type === FurnitureType.Seat);
+            seats.forEach((seat) => {
+                const { x, y, width, height } = seat;
+                state.magnets.push(
+                    { x, y, rotation: 0 },
+                    { x: x + width, y, rotation: 90 },
+                    { x: x + width, y: y + height, rotation: 180 },
+                    { x, y: y + height, rotation: 270 }
+                );
+            });
+        },
+        removeMagnets: (state) => {
+            state.magnets = [];
+        },
     },
 });
 
 // actions
-export const { place, move, setSelected, setStageRect, setDrop } = slice.actions;
+export const { place, move, setSelected, setStageRect, setDrop, addMagnets, removeMagnets } = slice.actions;
 // selectors
 export const selectFurniture = (state: RootState) => furniture;
 export const selectArtboard = (state: RootState) => artboard;
 export const selectPlacement = (state: RootState) => state.artboard.placement;
 export const selectStageRect = (state: RootState) => state.artboard.stageRect;
 export const selectDrop = (state: RootState) => state.artboard.drop;
+export const selectMagnets = (state: RootState) => state.artboard.magnets;
 // reducer
 export const artboardReducer = slice.reducer;

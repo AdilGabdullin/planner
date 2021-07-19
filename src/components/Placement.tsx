@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { Vector2d } from "konva/lib/types";
 import { Placement as PlacementType } from "../slices/artboard";
+import { FurnitureType } from "../config";
 
 type KEO = KonvaEventObject<globalThis.DragEvent>;
 
@@ -104,7 +105,8 @@ function getGroupRectOffset(grouped: PlacementType[], round: (x: number) => numb
         ox1: 0,
         oy1: 0,
     };
-    for (const p of grouped) {
+    const noCorner = (p: PlacementType) => p.type === FurnitureType.Seat || p.type === FurnitureType.Complex;
+    for (const p of grouped.filter(noCorner)) {
         const { x, y, width, height, offset } = p;
         const [ox1, oy1] = offset;
         if (x < xMin || x + ox1 < xMin + res.ox1) {
