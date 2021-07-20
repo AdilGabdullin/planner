@@ -1,7 +1,8 @@
 import { useState, useRef, DragEventHandler, DragEvent } from "react";
 import styled from "styled-components";
 import { useAppDispatch, useAppSelector } from "../store";
-import { selectFurniture, setDrop, addMagnets, removeMagnets } from "../slices/artboard";
+import { selectFurniture, setDrop, addMagnets, removeMagnets, setSelected } from "../slices/artboard";
+import { FurnitureType } from "../config";
 
 export function Selector() {
     // state
@@ -33,7 +34,11 @@ export function Selector() {
         if (id === null) return;
         setEmptyDragImage(e);
         dispatch(setDrop({ id: +id }));
-        dispatch(addMagnets());
+        dispatch(setSelected([]));
+        const type = furniture[+id].type;
+        if (type === FurnitureType.LeftCorner || type === FurnitureType.RightCorner) {
+            dispatch(addMagnets());
+        }
     };
     const handleDragEnd: DragEventHandler = (e) => {
         dispatch(setDrop({ visible: false }));

@@ -1,8 +1,9 @@
 import { config } from "../config";
-import { createSlice, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import { IRect } from "konva/lib/types";
 import { FurnitureType } from "../config";
+import { Util } from "konva/lib/Util";
 
 // config to furniture
 const toPixel = (x: number) => x * config.ppmArtboard;
@@ -72,30 +73,50 @@ const slice = createSlice({
                 id,
                 x: x - ox1,
                 y: y - oy1,
-                width: furn.width + ox1 + ox2,
-                height: furn.height + oy1 + oy2,
                 rotation: rotation ?? 0,
                 selected: false,
+                width: furn.width + ox1 + ox2,
+                height: furn.height + oy1 + oy2,
                 offset,
                 type: furn.type,
             });
         },
         move: (state, action: PayloadAction<{ selected: number[]; movementX: number; movementY: number }>) => {
+            const { placement } = state;
             const { selected, movementX, movementY } = action.payload;
-            const notCornerId = selected.find((id) => furniture[id].type === FurnitureType.Seat) as number; // selection always contain no corner
-            const { x, y } = state.placement[notCornerId];
+            const notCornerId = selected.find((id) => {
+                const type = placement[id].type;
+                return type === FurnitureType.Seat || type === FurnitureType.Complex;
+            });
+            if (notCornerId === undefined) return state;
+            const { x, y } = placement[notCornerId];
             const dx = round(x + movementX) - x;
             const dy = round(y + movementY) - y;
             selected.forEach((id) => {
-                const p = state.placement[id];
+                const p = placement[id];
                 p.x += dx;
                 p.y += dy;
             });
         },
         setSelected: (state, action: PayloadAction<number[]>) => {
+            const { placement } = state;
+            // const conflict = (p1: Placement, p2: Placement) => {
+            //     const result = Util.haveIntersection(current(p1), current(p2));
+            //     console.log(current(p1), current(p2), result);
+            //     return result;
+            // };
+            // const attached = (id: number) => {
+            //     const result = placement.filter((p) => conflict(placement[id], p));
+            //     // console.log(id, result);
+            //     return result;
+            // };
+            // function addAttached(ids: number[]) {
+            //     return [...ids, ...ids.flatMap(attached)];
+            // }
+            // const ids = addAttached(action.payload);
             const ids = action.payload;
-            for (let id = 0; id < state.placement.length; id++) {
-                state.placement[id].selected = ids.includes(id);
+            for (let id = 0; id < placement.length; id++) {
+                placement[id].selected = ids.includes(id);
             }
         },
         setStageRect: (state, action: PayloadAction<IRect>) => {

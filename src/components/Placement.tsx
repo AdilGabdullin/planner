@@ -25,17 +25,14 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
     const stageRect = useAppSelector(selectStageRect);
     const [start, setStart] = useState({ x: 0, y: 0 });
     const grouped = placement.filter((p) => p.selected);
-    const {
-        groupRect,
-        offset: { ox1, oy1 },
-    } = getGroupRectOffset(grouped, round);
+    const groupRect = getGroupRect(grouped, round);
     const groupWidth = groupRect.width;
     const groupHeight = groupRect.height;
     const xRange = [
-        stageRect.x + ox1 + padding - start.x - 1,
-        stageRect.x + stageRect.width + ox1 - groupWidth - padding - start.x - 1,
+        stageRect.x + padding - groupRect.x,
+        stageRect.x + stageRect.width - groupWidth - padding - groupRect.x,
     ];
-    const yRange = [oy1 + padding - start.y - 1, stageRect.height + oy1 - groupHeight - padding - start.y - 1];
+    const yRange = [padding - groupRect.y, stageRect.height - groupHeight - padding - groupRect.y];
     const dragBoundFunc = (pos: Vector2d) => {
         return {
             x: toRange(pos.x, xRange),
@@ -57,7 +54,8 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
         dispatch(setSelected(selected));
     };
     const onMouseEnter = (id: number) => (e: KEO) => {
-        if (!rectMode) dispatch(setSelected([id]));
+        if (rectMode) return;
+        dispatch(setSelected([id]));
     };
     return (
         <>
@@ -72,6 +70,9 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
                     />
                 );
             })}
+            {/* {placement.map(({ x, y, width, height }, key) => {
+                return <Rect stroke="cyan" {...{ x, y, width, height, key }} />;
+            })} */}
             {grouped.length > 0 && !rectMode && (
                 <Group draggable {...{ onDragStart, onDragEnd, dragBoundFunc }}>
                     {grouped.map(({ id, x, y, rotation }, key) => {
@@ -96,44 +97,26 @@ function toRange(x: number, [min, max]: number[]) {
     return x;
 }
 
-function getGroupRectOffset(grouped: PlacementType[], round: (x: number) => number) {
+function getGroupRect(grouped: PlacementType[], round: (x: number) => number) {
     let xMin = Infinity;
     let yMin = Infinity;
     let xMax = -Infinity;
     let yMax = -Infinity;
-    let res = {
-        ox1: 0,
-        oy1: 0,
-    };
     const noCorner = (p: PlacementType) => p.type === FurnitureType.Seat || p.type === FurnitureType.Complex;
     for (const p of grouped.filter(noCorner)) {
-        const { x, y, width, height, offset } = p;
-        const [ox1, oy1] = offset;
-        if (x < xMin || x + ox1 < xMin + res.ox1) {
-            xMin = x;
-            res.ox1 = ox1;
-        }
-        if (y < yMin || y + oy1 < yMin + res.oy1) {
-            yMin = y;
-            res.oy1 = oy1;
-        }
-        if (x + width > xMax) {
-            xMax = x + width;
-        }
-        if (y + height > yMax) {
-            yMax = y + height;
-        }
+        const { x, y, width, height } = p;
+        if (x < xMin) xMin = x;
+        if (y < yMin) yMin = y;
+        if (x + width > xMax) xMax = x + width;
+        if (y + height > yMax) yMax = y + height;
     }
     const x = round(xMin);
     const y = round(yMin);
     return {
-        groupRect: {
-            x,
-            y,
-            width: round(xMax) - x,
-            height: round(yMax) - y,
-            visible: grouped.length > 0,
-        },
-        offset: res,
+        x,
+        y,
+        width: round(xMax) - x,
+        height: round(yMax) - y,
+        visible: grouped.length > 0,
     };
 }
