@@ -59,7 +59,7 @@ export function Selector() {
                             onDragEnd={handleDragEnd}
                             data-furniture-id={i}
                         >
-                            <img src={`/images/${file}`} alt={name} width={selectorWidth} data-furniture-id={i} />
+                            <img src={`${process.env.PUBLIC_URL}/images/${file}`} alt={name} width={selectorWidth} data-furniture-id={i} />
                             <figcaption>
                                 {name} <br /> {code} <br /> {price} EUR{" "}
                             </figcaption>
