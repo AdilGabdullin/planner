@@ -65,18 +65,32 @@ const slice = createSlice({
     reducers: {
         place: (state, action: PayloadAction<{ id: number; x: number; y: number; rotation?: number }>) => {
             const { id, x, y, rotation } = action.payload;
-            const furn = furniture[id];
-            const { offset } = furn;
+            const { width, height, type, offset } = furniture[id];
             const [ox1, oy1, ox2, oy2] = offset;
+            const r = ((rotation ?? 0) + 360) % 360;
+            const rect = { x: x - ox1, y: y - oy1, width: width + ox1 + ox2, height: height + oy1 + oy2 };
+            if (r === 90) {
+                rect.x -= height;
+                rect.width += height - width;
+                rect.height += width - height;
+            } else if (r === 180) {
+                rect.y -= height;
+                rect.x -= width;
+            } else if (r === 270) {
+                rect.y -= width;
+                rect.width += height - width;
+                rect.height += width - height;
+            }
+
             state.placement.push({
                 id,
                 x: x - ox1,
                 y: y - oy1,
-                rotation: rotation ?? 0,
+                rotation: r,
                 selected: false,
-                rect: { x: x - ox1, y: y - oy1, width: furn.width + ox1 + ox2, height: furn.height + oy1 + oy2 },
+                rect,
                 offset,
-                type: furn.type,
+                type,
             });
         },
         move: (state, action: PayloadAction<{ selected: number[]; movementX: number; movementY: number }>) => {
