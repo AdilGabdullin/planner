@@ -14,7 +14,8 @@ const furniture = config.furniture.map((furnitureConfig) => {
     const image = new Image();
     image.width = width;
     image.height = height;
-    image.src = `/images/${file}`;
+    image.src = `${process.env.PUBLIC_URL}/images/${file}`;
+    console.log(image.src);
     return {
         ...furnitureConfig,
         image,

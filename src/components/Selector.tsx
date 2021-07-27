@@ -47,7 +47,7 @@ export function Selector() {
     return (
         <Carousel>
             <LeftChevron visible={state.chevrons[0]}>
-                <img src="/images/icons/arrow.svg" alt="left" onClick={() => move(1)} />
+                <img src={`${process.env.PUBLIC_URL}/images/icons/arrow.svg`} alt="left" onClick={() => move(1)} />
             </LeftChevron>
             <OuterWrap ref={outerWrap}>
                 <InnerWrap width={innerWidth} shift={state.shift}>
@@ -68,7 +68,7 @@ export function Selector() {
                 </InnerWrap>
             </OuterWrap>
             <RightChevron visible={state.chevrons[1]}>
-                <img src="/images/icons/arrow.svg" alt="right" onClick={() => move(-1)} />
+                <img src={`${process.env.PUBLIC_URL}/images/icons/arrow.svg`} alt="right" onClick={() => move(-1)} />
             </RightChevron>
         </Carousel>
     );

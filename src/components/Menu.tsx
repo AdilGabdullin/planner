@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Circle, Group, Image } from "react-konva";
 
 const rotationIcon = document.createElement("img");
-rotationIcon.src = "images/icons/rotate.svg";
+rotationIcon.src = `${process.env.PUBLIC_URL}/images/icons/rotate.svg`;
 
 export function Menu({ x, y, onRotate }: { x: number; y: number; onRotate: () => void }) {
     const size = 30;
