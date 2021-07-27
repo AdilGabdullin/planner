@@ -1,21 +1,21 @@
 {
   "files": {
     "main.css": "/static/css/main.dccdc0b5.chunk.css",
-    "main.js": "/static/js/main.7a1b2732.chunk.js",
-    "main.js.map": "/static/js/main.7a1b2732.chunk.js.map",
+    "main.js": "/static/js/main.21e36695.chunk.js",
+    "main.js.map": "/static/js/main.21e36695.chunk.js.map",
     "runtime-main.js": "/static/js/runtime-main.cb1f9eb5.js",
     "runtime-main.js.map": "/static/js/runtime-main.cb1f9eb5.js.map",
-    "static/js/2.f19a9423.chunk.js": "/static/js/2.f19a9423.chunk.js",
-    "static/js/2.f19a9423.chunk.js.map": "/static/js/2.f19a9423.chunk.js.map",
+    "static/js/2.c93c6942.chunk.js": "/static/js/2.c93c6942.chunk.js",
+    "static/js/2.c93c6942.chunk.js.map": "/static/js/2.c93c6942.chunk.js.map",
     "index.html": "/index.html",
     "static/css/main.dccdc0b5.chunk.css.map": "/static/css/main.dccdc0b5.chunk.css.map",
-    "static/js/2.f19a9423.chunk.js.LICENSE.txt": "/static/js/2.f19a9423.chunk.js.LICENSE.txt",
+    "static/js/2.c93c6942.chunk.js.LICENSE.txt": "/static/js/2.c93c6942.chunk.js.LICENSE.txt",
     "static/media/index.css": "/static/media/AtlasGrotesk-Thin-Web.929f76a5.woff"
   },
   "entrypoints": [
     "static/js/runtime-main.cb1f9eb5.js",
-    "static/js/2.f19a9423.chunk.js",
+    "static/js/2.c93c6942.chunk.js",
     "static/css/main.dccdc0b5.chunk.css",
-    "static/js/main.7a1b2732.chunk.js"
+    "static/js/main.21e36695.chunk.js"
   ]
 }
