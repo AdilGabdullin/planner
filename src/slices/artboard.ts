@@ -3,7 +3,7 @@ import { createSlice, PayloadAction, current } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import { IRect } from "konva/lib/types";
 import { FurnitureType } from "../config";
-// import { Util } from "konva/lib/Util";
+import { Util } from "konva/lib/Util";
 
 // config to furniture
 const toPixel = (x: number) => x * config.ppmArtboard;
@@ -81,7 +81,6 @@ const slice = createSlice({
                 rect.width += height - width;
                 rect.height += width - height;
             }
-
             state.placement.push({
                 id,
                 x: x - ox1,
@@ -150,24 +149,27 @@ const slice = createSlice({
             });
         },
         setSelected: (state, action: PayloadAction<number[]>) => {
-            const { placement } = state;
-            // const conflict = (p1: Placement, p2: Placement) => {
-            //     const result = Util.haveIntersection(current(p1), current(p2));
-            //     console.log(current(p1), current(p2), result);
-            //     return result;
-            // };
-            // const attached = (id: number) => {
-            //     const result = placement.filter((p) => conflict(placement[id], p));
-            //     // console.log(id, result);
-            //     return result;
-            // };
-            // function addAttached(ids: number[]) {
-            //     return [...ids, ...ids.flatMap(attached)];
-            // }
-            // const ids = addAttached(action.payload);
-            const ids = action.payload;
+            const placement = current(state.placement);
+            const allIds = placement.map((p, i) => i);
+            const conflict = (id1: number, id2: number) => {
+                const t = 4;
+                const crop = ({ x, y, width, height }: IRect) => ({
+                    x: x + t,
+                    y: y + t,
+                    width: width - 2 * t,
+                    height: height - 2 * t,
+                });
+                return Util.haveIntersection(crop(placement[id1].rect), crop(placement[id2].rect));
+            };
+            const attached = (id1: number) => allIds.filter((id2) => conflict(id1, id2));
+            const unique = (xs: number[]) => Array.from(new Set(xs));
+            const add = (ids: number[]): number[] => {
+                const result = unique(ids.flatMap(attached));
+                return result.length === ids.length ? result : add(result);
+            };
+            const selected = add(action.payload);
             for (let id = 0; id < placement.length; id++) {
-                placement[id].selected = ids.includes(id);
+                state.placement[id].selected = selected.includes(id);
             }
         },
         setStageRect: (state, action: PayloadAction<IRect>) => {

@@ -64,9 +64,9 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
     };
     return (
         <>
-            {placement.map(({ rect: { x, y, width, height } }, key) => {
+            {/* {placement.map(({ rect: { x, y, width, height } }, key) => {
                 return <Rect stroke="cyan" {...{ x, y, width, height, key }} />;
-            })}
+            })} */}
             {placement.map(({ id, x, y, rotation, selected }, key) => {
                 if (selected && !rectMode) return null;
                 const offset = furniture[id].offset;
