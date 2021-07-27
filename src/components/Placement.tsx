@@ -1,5 +1,6 @@
 import {
     move,
+    rotate,
     setSelected,
     selectPlacement,
     selectFurniture,
@@ -12,6 +13,7 @@ import { useAppSelector } from "../store";
 import { useDispatch } from "react-redux";
 import { useState } from "react";
 import { Vector2d } from "konva/lib/types";
+import { Menu } from "./Menu";
 import { Placement as PlacementType } from "../slices/artboard";
 import { FurnitureType } from "../config";
 
@@ -25,6 +27,10 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
     const stageRect = useAppSelector(selectStageRect);
     const [start, setStart] = useState({ x: 0, y: 0 });
     const grouped = placement.filter((p) => p.selected);
+    const selected: number[] = [];
+    placement.forEach((p, i) => {
+        if (p.selected) selected.push(i);
+    });
     const groupRect = getGroupRect(grouped, round);
     const groupWidth = groupRect.width;
     const groupHeight = groupRect.height;
@@ -44,14 +50,13 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
         setStart({ x, y });
     };
     const onDragEnd = (e: KEO) => {
-        const selected: number[] = [];
-        placement.forEach((p, i) => {
-            if (p.selected) selected.push(i);
-        });
         const { x, y } = e.target.getClientRect();
         dispatch(move({ selected, movementX: x - start.x, movementY: y - start.y }));
         dispatch(setSelected([]));
         dispatch(setSelected(selected));
+    };
+    const onRotate = () => {
+        dispatch(rotate({ selected, groupRect }));
     };
     const onMouseEnter = (id: number) => (e: KEO) => {
         if (rectMode) return;
@@ -59,6 +64,9 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
     };
     return (
         <>
+            {placement.map(({ rect: { x, y, width, height } }, key) => {
+                return <Rect stroke="cyan" {...{ x, y, width, height, key }} />;
+            })}
             {placement.map(({ id, x, y, rotation, selected }, key) => {
                 if (selected && !rectMode) return null;
                 const offset = furniture[id].offset;
@@ -70,9 +78,6 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
                     />
                 );
             })}
-            {/* {placement.map(({ x, y, width, height }, key) => {
-                return <Rect stroke="cyan" {...{ x, y, width, height, key }} />;
-            })} */}
             {grouped.length > 0 && !rectMode && (
                 <Group draggable {...{ onDragStart, onDragEnd, dragBoundFunc }}>
                     {grouped.map(({ id, x, y, rotation }, key) => {
@@ -85,6 +90,7 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
                         );
                     })}
                     {groupRect.visible && <Rect {...groupRect} stroke="black" />}
+                    <Menu x={groupRect.x} y={groupRect.y} onRotate={onRotate} />
                 </Group>
             )}
         </>
@@ -104,7 +110,7 @@ function getGroupRect(grouped: PlacementType[], round: (x: number) => number) {
     let yMax = -Infinity;
     const noCorner = (p: PlacementType) => p.type === FurnitureType.Seat || p.type === FurnitureType.Complex;
     for (const p of grouped.filter(noCorner)) {
-        const { x, y, width, height } = p;
+        const { x, y, width, height } = p.rect;
         if (x < xMin) xMin = x;
         if (y < yMin) yMin = y;
         if (x + width > xMax) xMax = x + width;

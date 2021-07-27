@@ -38,7 +38,7 @@ export function AppStage({ dropRef }: { dropRef: React.RefObject<KonvaImage> }) 
         if (!rectMode) return;
         const selected: number[] = [];
         placement.forEach((p, i) => {
-            if (Util.haveIntersection(rect, p)) selected.push(i);
+            if (Util.haveIntersection(rect, p.rect)) selected.push(i);
         });
         dispatch(setSelected(selected));
         setState(initialState);

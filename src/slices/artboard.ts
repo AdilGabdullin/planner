@@ -1,9 +1,9 @@
 import { config } from "../config";
-import { createSlice, current, PayloadAction } from "@reduxjs/toolkit";
+import { createSlice, PayloadAction, current } from "@reduxjs/toolkit";
 import { RootState } from "../store";
 import { IRect } from "konva/lib/types";
 import { FurnitureType } from "../config";
-import { Util } from "konva/lib/Util";
+// import { Util } from "konva/lib/Util";
 
 // config to furniture
 const toPixel = (x: number) => x * config.ppmArtboard;
@@ -39,10 +39,9 @@ export interface Placement {
     id: number;
     x: number;
     y: number;
-    width: number;
-    height: number;
     rotation: number;
     selected: boolean;
+    rect: IRect;
     offset: number[];
     type: FurnitureType;
 }
@@ -75,8 +74,7 @@ const slice = createSlice({
                 y: y - oy1,
                 rotation: rotation ?? 0,
                 selected: false,
-                width: furn.width + ox1 + ox2,
-                height: furn.height + oy1 + oy2,
+                rect: { x: x - ox1, y: y - oy1, width: furn.width + ox1 + ox2, height: furn.height + oy1 + oy2 },
                 offset,
                 type: furn.type,
             });
@@ -89,13 +87,52 @@ const slice = createSlice({
                 return type === FurnitureType.Seat || type === FurnitureType.Complex;
             });
             if (notCornerId === undefined) return state;
-            const { x, y } = placement[notCornerId];
+            const { x, y } = placement[notCornerId].rect;
             const dx = round(x + movementX) - x;
             const dy = round(y + movementY) - y;
             selected.forEach((id) => {
                 const p = placement[id];
                 p.x += dx;
                 p.y += dy;
+                p.rect.x += dx;
+                p.rect.y += dy;
+            });
+        },
+        rotate: (
+            state,
+            action: PayloadAction<{ selected: number[]; groupRect: { x: number; y: number; height: number } }>
+        ) => {
+            const { placement } = state;
+            const { selected, groupRect } = action.payload;
+            const { x: gx, y: gy, height: gh } = groupRect;
+            selected.forEach((id) => {
+                const p = placement[id];
+                const {
+                    rotation,
+                    rect,
+                    offset: [ox1, oy1],
+                } = current(p);
+                const { x: rx, y: ry, height: rh, width: rw } = rect;
+                const dx = gx + gy + gh - rx - ry - rh;
+                const dy = -gx + gy + rx - ry;
+                p.rect.x += dx;
+                p.rect.y += dy;
+                p.rect.height = rw;
+                p.rect.width = rh;
+                p.rotation = (p.rotation + 90) % 360;
+                if (rotation === 0) {
+                    p.x = p.rect.x + rh - ox1 - oy1;
+                    p.y = p.rect.y - oy1 + ox1;
+                } else if (rotation === 90) {
+                    p.x = p.rect.x + rh - ox1 - ox1;
+                    p.y = p.rect.y + rw - oy1 - oy1;
+                } else if (rotation === 180) {
+                    p.x = p.rect.x - ox1 + oy1;
+                    p.y = p.rect.y + rw - oy1 - ox1;
+                } else {
+                    p.x = p.rect.x;
+                    p.y = p.rect.y;
+                }
             });
         },
         setSelected: (state, action: PayloadAction<number[]>) => {
@@ -133,7 +170,7 @@ const slice = createSlice({
         addMagnets: (state) => {
             const seats = state.placement.filter((p) => p.type === FurnitureType.Seat);
             seats.forEach((seat) => {
-                const { x, y, width, height } = seat;
+                const { x, y, width, height } = seat.rect;
                 state.magnets.push(
                     { x, y, rotation: 0 },
                     { x: x + width, y, rotation: 90 },
@@ -149,7 +186,7 @@ const slice = createSlice({
 });
 
 // actions
-export const { place, move, setSelected, setStageRect, setDrop, addMagnets, removeMagnets } = slice.actions;
+export const { place, move, rotate, setSelected, setStageRect, setDrop, addMagnets, removeMagnets } = slice.actions;
 // selectors
 export const selectFurniture = (state: RootState) => furniture;
 export const selectArtboard = (state: RootState) => artboard;
