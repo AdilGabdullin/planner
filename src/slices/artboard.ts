@@ -15,7 +15,6 @@ const furniture = config.furniture.map((furnitureConfig) => {
     image.width = width;
     image.height = height;
     image.src = `${process.env.PUBLIC_URL}/images/${file}`;
-    console.log(image.src);
     return {
         ...furnitureConfig,
         image,
@@ -149,6 +148,12 @@ const slice = createSlice({
                 }
             });
         },
+        remove: (state, action: PayloadAction<{ selected: number[] }>) => {
+            const { selected } = action.payload;
+            console.log(selected);
+            console.log(current(state.placement));
+            state.placement = state.placement.filter((p, i) => !selected.includes(i));
+        },
         setSelected: (state, action: PayloadAction<number[]>) => {
             const placement = current(state.placement);
             const allIds = placement.map((p, i) => i);
@@ -203,13 +208,26 @@ const slice = createSlice({
 });
 
 // actions
-export const { place, move, rotate, setSelected, setStageRect, setDrop, addMagnets, removeMagnets } = slice.actions;
+export const { place, move, rotate, remove, setSelected, setStageRect, setDrop, addMagnets, removeMagnets } =
+    slice.actions;
 // selectors
 export const selectFurniture = (state: RootState) => furniture;
 export const selectArtboard = (state: RootState) => artboard;
 export const selectPlacement = (state: RootState) => state.artboard.placement;
 export const selectStageRect = (state: RootState) => state.artboard.stageRect;
-export const selectDrop = (state: RootState) => state.artboard.drop;
+export const selectDrop = (state: RootState) => {
+    const crop = ({ x, y, width, height }: IRect, t = 4) => ({
+        x: x + t,
+        y: y + t,
+        width: width - 2 * t,
+        height: height - 2 * t,
+    });
+    const { placement, drop } = state.artboard;
+    const conflict = (rect1: IRect, rect2: IRect) => Util.haveIntersection(crop(rect1), crop(rect2));
+    const { width, height } = furniture[drop.id];
+    const possible = (x: number, y: number) => placement.every((p) => !conflict(p.rect, { x, y, width, height }));
+    return { ...state.artboard.drop, possible };
+};
 export const selectMagnets = (state: RootState) => state.artboard.magnets;
 // reducer
 export const artboardReducer = slice.reducer;

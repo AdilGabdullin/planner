@@ -1,6 +1,7 @@
 import {
     move,
     rotate,
+    remove,
     setSelected,
     selectPlacement,
     selectFurniture,
@@ -58,6 +59,9 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
     const onRotate = () => {
         dispatch(rotate({ selected, groupRect }));
     };
+    const onDelete = () => {
+        dispatch(remove({ selected }));
+    };
     const onMouseEnter = (id: number) => (e: KEO) => {
         if (rectMode) return;
         dispatch(setSelected([id]));
@@ -90,7 +94,7 @@ export function Placement({ rectMode }: { rectMode: boolean }) {
                         );
                     })}
                     {groupRect.visible && <Rect {...groupRect} stroke="black" />}
-                    <Menu x={groupRect.x} y={groupRect.y} onRotate={onRotate} />
+                    <Menu x={groupRect.x} y={groupRect.y} onRotate={onRotate} onDelete={onDelete} />
                 </Group>
             )}
         </>
